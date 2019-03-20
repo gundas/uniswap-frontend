@@ -81,7 +81,6 @@ class Swap extends Component {
     if (!inputValue || inputIsZero || !outputValue || outputIsZero || !inputCurrency || !outputCurrency || isUnapproved) {
       isValid = false;
     }
-
     const { value: inputBalance, decimals: inputDecimals } = selectors().getBalance(account, inputCurrency);
 
     if (inputBalance.isLessThan(BN(inputValue * 10 ** inputDecimals))) {
@@ -97,6 +96,7 @@ class Swap extends Component {
       outputError,
       isValid: isValid && !inputError && !outputError,
     };
+
   }
 
   flipInputOutput = () => {
@@ -377,15 +377,15 @@ class Swap extends Component {
       inputAmountB,
       lastEditedField,
     } = this.state;
-    const ALLOWED_SLIPPAGE = 0.025;
-    const TOKEN_ALLOWED_SLIPPAGE = 0.04;
+    const ALLOWED_SLIPPAGE = 0.005;
+    const TOKEN_ALLOWED_SLIPPAGE = 0.005;
 
     const type = getSwapType(inputCurrency, outputCurrency);
     const { decimals: inputDecimals } = selectors().getBalance(account, inputCurrency);
     const { decimals: outputDecimals } = selectors().getBalance(account, outputCurrency);
     let deadline;
     try {
-      deadline = await retry(() => getBlockDeadline(web3, 300));
+      deadline = await retry(() => getBlockDeadline(web3, 1200));
     } catch(e) {
       // TODO: Handle error.
       return;
@@ -469,7 +469,7 @@ class Swap extends Component {
             )
             .send({
               from: account,
-              value: BN(inputValue).multipliedBy(10 ** inputDecimals).multipliedBy(1 + ALLOWED_SLIPPAGE).toFixed(0),
+              value: BN(inputValue).multipliedBy(10 ** inputDecimals).toFixed(0),
             }, (err, data) => {
               if (!err) {
                 addPendingTx(data);
@@ -580,8 +580,8 @@ class Swap extends Component {
       action: 'Open',
     });
 
-    const ALLOWED_SLIPPAGE = 0.025;
-    const TOKEN_ALLOWED_SLIPPAGE = 0.04;
+    const ALLOWED_SLIPPAGE = 0.005;
+    const TOKEN_ALLOWED_SLIPPAGE = 0.005;
 
     const type = getSwapType(inputCurrency, outputCurrency);
     const { label: inputLabel, decimals: inputDecimals } = selectors().getBalance(account, inputCurrency);
@@ -682,7 +682,7 @@ class Swap extends Component {
       return '';
     }
 
-    const balanceInput = balance.dividedBy(BN(10 ** decimals)).toFixed(4)
+    const balanceInput = balance.dividedBy(BN(10 ** decimals)).toFixed(decimals)
     return this.props.t("balance", { balanceInput })
   }
 

@@ -63,10 +63,6 @@ export const selectors = () => (dispatch, getState) => {
   };
 
   const getBalance = (address, tokenAddress) => {
-    if (process.env.NODE_ENV !== 'production' && !tokenAddress) {
-      console.warn('No token address found - return ETH balance');
-    }
-
     if (!tokenAddress || tokenAddress === 'ETH') {
       const balance = state.balances.ethereum[address];
       if (!balance) {
@@ -114,7 +110,6 @@ export const initialize = () => (dispatch, getState) => {
       resolve(web3connect.web3);
       return;
     }
-
     if (typeof window.ethereum !== 'undefined') {
       try {
         const web3 = new Web3(window.ethereum);
@@ -261,8 +256,8 @@ export const sync = () => async (dispatch, getState) => {
       if (tokenAddress === 'ethereum') {
         return;
       }
-
       const contract = contracts[tokenAddress] || new web3.eth.Contract(ERC20_ABI, tokenAddress);
+
       const contractBytes32 = contracts[tokenAddress] || new web3.eth.Contract(ERC20_WITH_BYTES_ABI, tokenAddress);
 
       if (!contracts[tokenAddress]) {
@@ -276,9 +271,13 @@ export const sync = () => async (dispatch, getState) => {
       }
 
       const watchlist = watched.balances[tokenAddress] || [];
+
       watchlist.forEach(async address => {
         const tokenBalance = getBalance(address, tokenAddress);
-        const balance = await contract.methods.balanceOf(address).call();
+        console.log(contract);
+        const   balance = await contract.methods.balanceOf(address).call();
+        console.log("279");
+        console.log(balance);
         const decimals = tokenBalance.decimals || await contract.methods.decimals().call();
         let symbol = tokenBalance.symbol;
         try {
